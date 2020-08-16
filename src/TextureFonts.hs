@@ -13,7 +13,7 @@ import Textures
 import Data.Maybe
 import Data.Char
 import qualified Data.HashTable.IO as HT
-
+import Control.Monad (forM_)
 
 -- build a display list for the fonts
 buildFonts :: IO(Maybe TextureObject,DisplayList)
@@ -106,6 +106,45 @@ printFonts' x y (fontTex,DisplayList _) st string =
       mapM_ callList lists --(map DisplayList [17..(32:: GLuint)])
       alphaFunc $= Nothing
       texture Texture2D $= Disabled
+
+printLine' :: Float -> Float ->
+       [(Double, Double)]-> IO()
+printLine' x y xs =
+   unsafePreservingMatrix $ do
+      loadIdentity
+      translate (Vector3 x y (0::Float))
+      alphaFunc $= Just (Greater,0.1:: Float)
+      color $ Color4 255 0 0 (255 :: GLubyte)
+      unsafeRenderPrimitive LineStrip $
+        forM_ xs $ \(x,y) -> vertex (Vertex2 x y)
+      alphaFunc $= Nothing
+      color $ Color4 255 255 255 (255 :: GLubyte)
+
+
+printLineBlue' :: Float -> Float ->
+       [(Double, Double)]-> IO()
+printLineBlue' x y xs =
+   unsafePreservingMatrix $ do
+      loadIdentity
+      translate (Vector3 x y (0::Float))
+      alphaFunc $= Just (Greater,0.1:: Float)
+      color $ Color4 0 255 0 (255 :: GLubyte)
+      unsafeRenderPrimitive LineStrip $
+        forM_ xs $ \(x,y) -> vertex (Vertex2 x y)
+      alphaFunc $= Nothing
+      color $ Color4 255 255 255 (255 :: GLubyte)
+
+
+printFramerate' :: Float -> Float ->
+       [Double]-> IO()
+printFramerate' x y xs =
+   unsafePreservingMatrix $ do
+      loadIdentity
+      translate (Vector3 x y (0::Float))
+      alphaFunc $= Just (Greater,0.1:: Float)
+      unsafeRenderPrimitive LineStrip $
+        forM_ (zip [0,5..] xs) $ \(x,y) -> vertex (Vertex2 x y)
+      alphaFunc $= Nothing
 
 
 -- sets up the orthographic mode so we can

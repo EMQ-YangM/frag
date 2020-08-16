@@ -33,7 +33,8 @@ data GameData = GameData {
                             lock           :: IORef(Bool),
                             fpsc           :: IORef(Double,Double),
                             fpss           :: IORef(Double,Double,Double),
-                            nems           :: !Int
+                            nems           :: !Int,
+                            framerate      :: IORef [Double]
                          }
 
 -- renders the playerstate, gun and crosshairs
@@ -58,7 +59,19 @@ renderHud gd playerState noos tme = do
 
           --print the number of objects
           printFonts' 0 416 (fonts gd) 1 ("No. of objs = " ++(show noos))
+          -- printFramerate' 20 300 [0..60]
 
+          ls <- readIORef (framerate gd)
+          let ta = init ls
+              res = ((1/dt) :: Double) : ta
+              avgl = sum res / 120
+          writeIORef (framerate gd) res
+          printLineBlue' 20 300 [(0,avgl),(600,avgl)]
+          printFramerate' 20 300 res
+          printLine' 20 300 [(0,90),(600,90)]
+          printLine' 20 300 [(0,60),(600,60)]
+          printLine' 20 300 [(0,30),(600,30)]
+          printLine' 20 300 [(0,0) ,(600,0) ]
           --print a message if the player has eliminated all enemies
           color $ Color4 0 255 0 (255 :: GLubyte)
           case ((score playerState) == (nems gd) && (nems gd) > 0) of

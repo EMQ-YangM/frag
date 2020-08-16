@@ -37,6 +37,9 @@ msInterval = 16
 clkRes :: Double
 clkRes = 1000
 
+scal :: GLsizei
+scal = 3
+
 data Input
   = KBMInput  { key :: Key,
                          keyState :: KeyState,
@@ -65,7 +68,7 @@ createAWindow :: String -> String -> IO ()
 createAWindow windowName level = do
    initialDisplayMode $= [WithDepthBuffer, DoubleBuffered, RGBAMode]
    drawBuffer             $= BackBuffers
-   initialWindowSize  $= Size 640 480
+   initialWindowSize  $= Size (640 * scal) (480 * scal)
    createWindow windowName
    clear [ColorBuffer]
    viewport               $= (Position 0 0, Size 640 480)
@@ -125,6 +128,7 @@ createAWindow windowName level = do
                                     (lasttime, (newInput,newMouseInput)) inpState True tme
    hasReact        <- newIORef False
    mp             <- readIORef mapRef
+   fr  <- newIORef (replicate 120 60)
 
    let gd = GameData {
           gamemap        = mapRef,
@@ -139,7 +143,8 @@ createAWindow windowName level = do
           lock           = lck,
           fpsc           = fpsc1,
           fpss           = fps1,
-          nems           = length objs - 1
+          nems           = length objs - 1,
+          framerate      = fr
    }
 
 
